@@ -50,7 +50,6 @@ class InvoiceController extends ControllerBase {
     ];
 
     $content = [];
-    // Only use node types the user has access to.
     foreach ($this->entityTypeManager()->getStorage('invoice_type')->loadMultiple() as $type) {
       $access = $this->entityTypeManager()->getAccessControlHandler('commerce_invoice')->createAccess($type->id(), NULL, [], TRUE);
       if ($access->isAllowed()) {
@@ -59,7 +58,6 @@ class InvoiceController extends ControllerBase {
       $this->renderer->addCacheableDependency($build, $access);
     }
 
-    // Bypass the node/add listing if only one content type is available.
     if (count($content) == 1) {
       $type = array_shift($content);
       return $this->redirect('entity.commerce_invoice.add', ['invoice_type' => $type->id()]);

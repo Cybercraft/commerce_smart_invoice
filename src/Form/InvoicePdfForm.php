@@ -11,7 +11,7 @@ class InvoicePdfForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to regenerate the pdf for invoice %label?', [
+    return $this->t('Regenerate the pdf for invoice %label?', [
       '%label' => $this->entity->label(),
     ]);
   }

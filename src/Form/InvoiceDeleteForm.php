@@ -44,7 +44,7 @@ class InvoiceDeleteForm extends ContentEntityConfirmFormBase {
       array(
         '%title' => $this->entity->label(),
       ));
-    // Redirect to term list after delete.
+    // Redirect to invoices list after delete.
     $form_state->setRedirect('entity.commerce_invoice.collection');
   }
 }

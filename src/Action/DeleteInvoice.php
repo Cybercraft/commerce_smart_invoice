@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "invoice_delete_action",
  *   label = @Translation("Delete selected invoices"),
  *   type = "commerce_invoice",
- *   confirm_form_route_name = "entity.profile.multiple_delete_confirm"
+ *   confirm_form_route_name = "entity.commerce_invoice.multiple_delete_confirm"
  * )
  */
 class DeleteInvoice extends ActionBase implements ContainerFactoryPluginInterface {
@@ -70,7 +70,7 @@ class DeleteInvoice extends ActionBase implements ContainerFactoryPluginInterfac
    * {@inheritdoc}
    */
   public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
-    /** @var \Drupal\profile\Entity\ProfileInterface $object */
+    /** @var \Drupal\profile\Entity\InvoiceInterface $object */
     return $object->access('delete', $account, $return_as_object);
   }
 

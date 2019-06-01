@@ -19,7 +19,7 @@ class InvoiceAccessCheck implements AccessInterface {
   protected $entityTypeManager;
 
   /**
-   * Constructs a ProfileAccessCheck object.
+   * Constructs a InvoiceAccessCheck object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity manager.

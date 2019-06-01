@@ -33,7 +33,8 @@ function commerce_smart_invoice_theme($existing, $type, $theme, $path) {
       'variables' => [
         'root_path' => DRUPAL_ROOT,
         'order' => null,
-        'invoice' => null
+        'invoice' => null,
+        'profile' => null
       ]
     ],
     'invoice_add_list' => [

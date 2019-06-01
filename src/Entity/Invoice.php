@@ -86,8 +86,7 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
       ->setReadOnly(TRUE);
 
     $fields['invoice_number'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Numéro de facture'))
-      ->setDescription(t('Le numéro de la facture'))
+      ->setLabel(t('Invoice number'))
       ->setSettings([
         'default_value' => '',
         'max_length' => 255,
@@ -102,7 +101,7 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
 
     $fields['order_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Commande liée'))
-      ->setDescription(t('Numéro de la commande liée'))
+      ->setDescription(t('Order ID'))
       ->setSetting('target_type', 'commerce_order')
       ->setSetting('handler', 'default')
       ->setCardinality(1)
@@ -133,8 +132,7 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
       ->setDescription(t('The time that the entity was last edited.'));
 
     $fields['pdf'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Facture au format PDF'))
-      ->setDescription(t('La facture généré pour toute commande complétée'))
+      ->setLabel(t('PDF Invoice'))
       ->setCardinality(1)
       ->setSetting('target_type', 'file')
       ->setSetting('handler', 'default')
@@ -177,24 +175,21 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
       ]
     ];
 
-    // Render the invoice
     $render = \Drupal::service('renderer')->render($render_array, FALSE);
-    // generate PDF
     $options = new Options();
-    $options->set('defaultFont', 'Courier');
     $dompdf = new Dompdf($options);
     $dompdf->loadHtml($render);
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
     $data = $dompdf->output();
     $file_exists = file_exists(\Drupal::service('file_system')
-      ->realpath('public://invoices/'));
+      ->realpath('private://invoices/'));
     if (!$file_exists) {
       \Drupal::service('file_system')
-        ->mkdir('public://invoices/', 0755, TRUE);
+        ->mkdir('private://invoices/', 0755, TRUE);
     }
 
-    $file = file_save_data($data, 'public://invoices/'. $invoice_id . '-invoice.pdf', FileSystemInterface::EXISTS_REPLACE);
+    $file = file_save_data($data, 'private://invoices/'. $invoice_id . '-invoice.pdf', FileSystemInterface::EXISTS_REPLACE);
     $file->setPermanent();
     $file->setFilename($invoice_id . '-invoice.pdf');
     $file->save();
@@ -256,21 +251,6 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
    */
   public function getType() {
     return $this->type->value;
-  }
-
-  public static function normalizeString ($str = '')
-  {
-    $str = strip_tags($str);
-    $str = preg_replace('/[\r\n\t ]+/', ' ', $str);
-    $str = preg_replace('/[\"\*\/\:\<\>\?\'\|]+/', ' ', $str);
-    $str = strtolower($str);
-    $str = html_entity_decode( $str, ENT_QUOTES, "utf-8" );
-    $str = htmlentities($str, ENT_QUOTES, "utf-8");
-    $str = preg_replace("/(&)([a-z])([a-z]+;)/i", '$2', $str);
-    $str = str_replace(' ', '-', $str);
-    $str = rawurlencode($str);
-    $str = str_replace('%', '-', $str);
-    return $str;
   }
 
   /**

@@ -43,10 +43,10 @@ class InvoiceEventSubscriber implements EventSubscriberInterface {
   public function onOrderValidationPost(WorkflowTransitionEvent $event) {
     $order = $event->getEntity();
     $date = new \DateTime();
-    $year = $date->format('y');
+    $date = $date->format('j-F-Y');
     $invoice = Invoice::create([
       'type' => 'default',
-      'invoice_number' => (int) $year . '0001',
+      'invoice_number' => $date,
       'order_id' => $order->id()
     ]);
     $invoice->save();
