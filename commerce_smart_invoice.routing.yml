@@ -1,0 +1,86 @@
+entity.commerce_invoice.collection:
+  path: '/admin/commerce/invoice'
+  defaults:
+    _entity_list: 'commerce_invoice'
+    _title: 'Invoices list'
+  requirements:
+    _permission: 'view commerce_invoice entity'
+
+entity.invoice_type.collection:
+  path: '/admin/commerce/invoices'
+  defaults:
+    _entity_list: 'invoice_type'
+    _title: 'Invoice types'
+  requirements:
+    _permission: 'administer invoices types'
+
+entity.invoice_type.add:
+  path: '/admin/commerce/invoices/add'
+  defaults:
+    _entity_form: invoice_type.add
+    _title: 'Add'
+  requirements:
+    _permission: 'administer invoices types'
+
+entity.commerce_invoice.canonical:
+  path: '/admin/commerce/invoice/{commerce_invoice}'
+  defaults:
+    _entity_view: 'commerce_invoice'
+    _title: 'Invoice Content'
+  requirements:
+    _entity_access: 'commerce_invoice.view'
+
+entity.commerce_invoice.add_page:
+  path: '/admin/commerce/invoice/add'
+  defaults:
+    _controller: Drupal\commerce_smart_invoice\Controller\InvoiceController::addPage
+    _title: 'Add invoice'
+  requirements:
+    _entity_create_access: 'commerce_invoice'
+
+entity.commerce_invoice.add:
+  path: '/admin/commerce/invoice/add/{invoiceType}'
+  defaults:
+    _controller: '\Drupal\commerce_smart_invoice\Controller\InvoiceController::add'
+    _title_callback: '\Drupal\commerce_smart_invoice\Controller\InvoiceController::addPageTitle'
+  requirements:
+    _entity_create_access: 'commerce_invoice'
+
+entity.commerce_invoice.add_form:
+  path: '/admin/commerce/invoice/add/{invoiceType}'
+  defaults:
+    _entity_form: commerce_invoice.add
+    _title: 'Add invoice'
+  requirements:
+    _entity_create_access: 'commerce_invoice'
+
+entity.commerce_invoice.edit_form:
+  path: '/admin/commerce/invoice/{commerce_invoice}/edit'
+  defaults:
+    _entity_form: commerce_invoice.edit
+    _title: 'Edit invoice'
+  requirements:
+    _entity_access: 'commerce_invoice.edit'
+
+entity.commerce_invoice.delete_form:
+  path: '/admin/commerce/invoice/{commerce_invoice}/delete'
+  defaults:
+    _entity_form: commerce_invoice.delete
+    _title: 'Delete invoice'
+  requirements:
+    _entity_access: 'commerce_invoice.delete'
+
+entity.commerce_invoice.settings:
+  path: '/admin/commerce/invoice/settings'
+  defaults:
+    _form: '\Drupal\commerce_smart_invoice\Form\InvoiceSettingsForm'
+    _title: 'Invoice Settings'
+  requirements:
+    _permission: 'administer commerce_invoice entity'
+
+entity.commerce_invoice.generate_form:
+  path: '/admin/commerce/invoice/{commerce_invoice}/pdf'
+  defaults:
+    _entity_form: 'commerce_invoice.generate'
+  requirements:
+    _entity_access: 'commerce_invoice.generate'

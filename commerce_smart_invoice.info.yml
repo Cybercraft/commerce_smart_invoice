@@ -1,0 +1,5 @@
+name: 'Commerce - Smart Invoice'
+type: module
+description: 'Drupal commerce invoices generation & management module'
+core: 8.x
+package: 'Commerce'

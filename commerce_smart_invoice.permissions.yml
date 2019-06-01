@@ -1,0 +1,24 @@
+administer commerce_invoice entity:
+  title: 'Administer invoice entity'
+  description: 'With this permission, user can administer invoices'
+  restrict access: TRUE
+view commerce_invoice entity:
+  title: 'View invoice entity'
+  description: 'With this permission, user can view invoices'
+  restrict access: TRUE
+edit commerce_invoice entity:
+  title: 'Edit invoice entity'
+  description: 'With this permission, user can edit invoices'
+  restrict access: TRUE
+add commerce_invoice entity:
+  title: 'Add invoice entity'
+  description: 'With this permission, user can add invoices'
+  restrict access: TRUE
+delete commerce_invoice entity:
+  title: 'Delete invoice entity'
+  description: 'With this permission, user can delete invoices'
+  restrict access: TRUE
+administer invoices types:
+  title: 'Administer invoices type'
+  description: 'With this permission, user can administer invoices type'
+  restrict access: TRUE

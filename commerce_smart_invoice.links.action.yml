@@ -1,0 +1,11 @@
+invoice_type.add:
+  route_name: entity.invoice_type.add
+  title: 'Add an invoice type'
+  appears_on:
+    - entity.invoice_type.collection
+#commerce_invoice.add:
+#  route_name: entity.commerce_invoice.add_page
+#  title: 'Ajouter une facture'
+#  appears_on:
+#    - entity.commerce_invoice.collection
+#    - entity.commerce_invoice.canonical

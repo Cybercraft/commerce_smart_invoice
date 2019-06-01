@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * @file
+ * Contains commerce_smart_invoice.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function commerce_smart_invoice_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the commerce_smart_invoice module.
+    case 'help.page.commerce_smart_invoice':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Invoice management module') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function commerce_smart_invoice_theme($existing, $type, $theme, $path) {
+  return [
+    'invoice' => [
+      'template' => 'commerce-invoice',
+      'variables' => [
+        'root_path' => DRUPAL_ROOT,
+        'order' => null,
+        'invoice' => null
+      ]
+    ],
+    'invoice_add_list' => [
+      'variables' => ['content' => NULL],
+    ],
+  ];
+}
+
