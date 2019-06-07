@@ -50,6 +50,7 @@ use Drupal\user\UserInterface;
  *   fieldable = TRUE,
  *   entity_keys = {
  *     "id" = "id",
+ *     "uid" = "uid",
  *     "uuid" = "uuid",
  *     "bundle" = "type",
  *     "label" = "invoice_number",
@@ -78,6 +79,11 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
     $fields['id'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('ID'))
       ->setDescription(t('The ID of the Invoice entity.'))
+      ->setReadOnly(TRUE);
+
+    $fields['uid'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('UID'))
+      ->setDescription(t('The user id of the owner.'))
       ->setReadOnly(TRUE);
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
