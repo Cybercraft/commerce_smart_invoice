@@ -83,8 +83,7 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
 
     $fields['uid'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('UID'))
-      ->setDescription(t('The user id of the owner.'))
-      ->setReadOnly(TRUE);
+      ->setDescription(t('The user id of the owner.'));
 
     $fields['uuid'] = BaseFieldDefinition::create('uuid')
       ->setLabel(t('UUID'))
@@ -189,13 +188,13 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
     $dompdf->render();
     $data = $dompdf->output();
     $file_exists = file_exists(\Drupal::service('file_system')
-      ->realpath('private://invoices/'));
+      ->realpath('public://invoices/'));
     if (!$file_exists) {
       \Drupal::service('file_system')
-        ->mkdir('private://invoices/', 0755, TRUE);
+        ->mkdir('public://invoices/', 0755, TRUE);
     }
 
-    $file = file_save_data($data, 'private://invoices/'. $invoice_id . '-invoice.pdf', FileSystemInterface::EXISTS_REPLACE);
+    $file = file_save_data($data, 'public://invoices/'. $invoice_id . '-invoice.pdf', FileSystemInterface::EXISTS_REPLACE);
     $file->setPermanent();
     $file->setFilename($invoice_id . '-invoice.pdf');
     $file->save();

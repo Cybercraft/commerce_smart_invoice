@@ -34,18 +34,19 @@ class InvoiceEventSubscriber implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents() {
     $events = [
-      'commerce_order.validation.post_transition' => ['onOrderValidationPost', 1],
+      'commerce_order.validate.post_transition' => ['generateInvoice', 1],
     ];
 
     return $events;
   }
 
-  public function onOrderValidationPost(WorkflowTransitionEvent $event) {
+  public function generateInvoice(WorkflowTransitionEvent $event) {
     $order = $event->getEntity();
     $date = new \DateTime();
     $date = $date->format('j-F-Y');
     $invoice = Invoice::create([
       'type' => 'default',
+      'uid' => \Drupal::currentUser()->id(),
       'invoice_number' => $date,
       'order_id' => $order->id()
     ]);
