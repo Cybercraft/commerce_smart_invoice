@@ -6,13 +6,11 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\file\Entity\File;
-use Drupal\user\UserInterface;
+use Drupal\commerce_smart_invoice\Event\PdfInvoiceEvent;
 
 /**
  * Defines the invoice entity class.
@@ -27,14 +25,18 @@ use Drupal\user\UserInterface;
  *     singular = "@count invoice",
  *     plural = "@count invoices",
  *   ),
- *   bundle_label = @Translation("Invoice type"),
+ *   base_table = "commerce_invoice",
+ *   entity_keys = {
+ *     "id" = "id",
+ *     "bundle" = "bundle",
+ *   },
+ *   fieldable = TRUE,
+ *   admin_permission = "administer commerce_invoice entity",
  *   handlers = {
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
- *     "views_data" = "Drupal\views\EntityViewsData",
  *     "list_builder" = "Drupal\commerce_smart_invoice\InvoiceListBuilder",
- *     "access" = "Drupal\commerce_smart_invoice\InvoiceAccessControlHandler",
- *     "permission_provider" = "Drupal\entity\UncacheableEntityPermissionProvider",
- *     "query_access" = "Drupal\entity\QueryAccess\UncacheableQueryAccessHandler",
+ *     "access" = "Drupal\Core\Entity\EntityAccessControlHandler",
+ *     "views_data" = "Drupal\views\EntityViewsData",
  *     "form" = {
  *       "default" = "Drupal\commerce_smart_invoice\Form\InvoiceForm",
  *       "add" = "Drupal\commerce_smart_invoice\Form\InvoiceForm",
@@ -42,56 +44,31 @@ use Drupal\user\UserInterface;
  *       "delete" = "Drupal\commerce_smart_invoice\Form\InvoiceDeleteForm",
  *       "generate" = "Drupal\commerce_smart_invoice\Form\InvoicePdfForm",
  *     },
- *   },
- *   bundle_entity_type = "invoice_type",
- *   base_table = "commerce_invoice",
- *   admin_permission = "administer commerce_invoice entity",
- *   permission_granularity = "bundle",
- *   fieldable = TRUE,
- *   entity_keys = {
- *     "id" = "id",
- *     "uid" = "uid",
- *     "uuid" = "uuid",
- *     "bundle" = "type",
- *     "label" = "invoice_number",
- *     "created" = "created",
- *     "changed" = "changed",
+ *     "route_provider" = {
+ *        "html" = "Drupal\Core\Entity\Routing\AdminHtmlRouteProvider",
+ *     },
  *   },
  *   links = {
- *     "canonical" = "/admin/commerce/invoice/{commerce_invoice}",
+ *     "canonical" = "/invoice/{commerce_invoice}",
+ *     "add-form" = "/admin/commerce/invoice/add/{commerce_invoice_type}",
+ *     "add-page" = "/admin/commerce/invoice/add",
  *     "edit-form" = "/admin/commerce/invoice/{commerce_invoice}/edit",
  *     "delete-form" = "/admin/commerce/invoice/{commerce_invoice}/delete",
- *     "collection" = "/admin/commerce/invoice",
- *     "generate-form" = "/admin/commerce/invoice/{commerce_invoice}/pdf"
+ *     "collection" = "/admin/commerce/invoices",
+ *     "generate-form" = "/invoice/{commerce_invoice}/pdf"
  *   },
- *   field_ui_base_route = "entity.invoice_type.edit_form",
- *   common_reference_target = TRUE,
+ *   bundle_entity_type = "commerce_invoice_type",
+ *   field_ui_base_route = "entity.commerce_invoice_type.edit_form",
  * )
  */
-class Invoice extends ContentEntityBase implements InvoiceInterface {
-
-  use EntityChangedTrait;
-  use StringTranslationTrait;
+class Invoice extends ContentEntityBase {
 
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
-    $fields['id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('ID'))
-      ->setDescription(t('The ID of the Invoice entity.'))
-      ->setReadOnly(TRUE);
-
-    $fields['uid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('UID'))
-      ->setDescription(t('The user id of the owner.'));
-
-    $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setDescription(t('The UUID of the Invoice entity.'))
-      ->setReadOnly(TRUE);
-
     $fields['invoice_number'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Invoice number'))
+      ->setDescription(t('The invoice identifier'))
       ->setSettings([
         'default_value' => '',
         'max_length' => 255,
@@ -105,8 +82,8 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['order_id'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Commande liée'))
-      ->setDescription(t('Order ID'))
+      ->setLabel(t('Linked order'))
+      ->setDescription(t('Linked order identifier'))
       ->setSetting('target_type', 'commerce_order')
       ->setSetting('handler', 'default')
       ->setCardinality(1)
@@ -137,7 +114,8 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
       ->setDescription(t('The time that the entity was last edited.'));
 
     $fields['pdf'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('PDF Invoice'))
+      ->setLabel(t('File entity'))
+      ->setDescription(t('File entity for linked invoice'))
       ->setCardinality(1)
       ->setSetting('target_type', 'file')
       ->setSetting('handler', 'default')
@@ -157,6 +135,7 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
   }
 
   public function generatePdf() {
+    \Drupal::service('event_dispatcher')->dispatch(PdfInvoiceEvent::INVOICE_PDF_GENERATION, new PdfInvoiceEvent($this));
     $root_path = DRUPAL_ROOT;
 
     /** @var Order $order */
@@ -249,36 +228,5 @@ class Invoice extends ContentEntityBase implements InvoiceInterface {
     /** @var \Drupal\commerce_order\Entity\Order $order */
     $order = $this->getOrder();
     return $order->getCustomer();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getType() {
-    return $this->type->value;
-  }
-
-  /**
-   * Sets the entity owner's user entity.
-   *
-   * @param \Drupal\user\UserInterface $account
-   *   The owner user entity.
-   *
-   * @return $this
-   */
-  public function setOwner(UserInterface $account) {
-    // TODO: Implement setOwner() method.
-  }
-
-  /**
-   * Sets the entity owner's user ID.
-   *
-   * @param int $uid
-   *   The owner user id.
-   *
-   * @return $this
-   */
-  public function setOwnerId($uid) {
-    // TODO: Implement setOwnerId() method.
   }
 }

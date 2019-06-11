@@ -1,17 +1,17 @@
 entity.commerce_invoice.collection:
   title: 'Invoices'
   route_name: entity.commerce_invoice.collection
-  description: 'Invoices list'
+  description: 'Invoices'
   parent: commerce.admin_commerce
   weight: 10
-entity.invoice_type.collection:
-  title: 'Invoices types list'
-  description: 'Manage invoice types, including fields.'
-  route_name: entity.invoice_type.collection
+entity.commerce_invoice_type.collection:
+  title: 'Invoices types'
+  description: 'Manage invoices types, including fields.'
+  route_name: entity.commerce_invoice_type.collection
   parent: commerce.configuration
   weight: 10
 entity.commerce_invoice.admin.structure.settings:
   title: 'Invoices Settings'
-  description: 'Configure invoice generation'
+  description: 'Configure invoice entity'
   route_name:  entity.commerce_invoice.settings
   parent: commerce.configuration

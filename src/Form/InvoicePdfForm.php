@@ -11,7 +11,7 @@ class InvoicePdfForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Regenerate the pdf for invoice %label?', [
+    return $this->t('Are you sure you want to regenerate the pdf for invoice %label?', [
       '%label' => $this->entity->label(),
     ]);
   }
@@ -34,7 +34,7 @@ class InvoicePdfForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    /** @var \Drupal\commerce_smart_invoice\Entity\Invoice $invoice */
+    /** @var \Drupal\ifapme_lg_invoice\Entity\Invoice $invoice */
     $invoice = $this->entity;
     $invoice->generatePdf();
     $invoice->save();

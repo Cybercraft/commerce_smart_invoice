@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\commerce_smart_invoice\Controller;
+namespace Drupal\ifapme_lg_invoice\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\commerce_smart_invoice\Entity\InvoiceTypeInterface;
+use Drupal\commerce_smart_invoice\Entity\InvoiceType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class InvoiceController extends ControllerBase {
@@ -45,22 +45,20 @@ class InvoiceController extends ControllerBase {
     $build = [
       '#theme' => 'invoice_add_list',
       '#cache' => [
-        'tags' => $this->entityTypeManager()->getDefinition('invoice_type')->getListCacheTags(),
+        'tags' => $this->entityTypeManager()->getDefinition('commerce_invoice_type')->getListCacheTags(),
       ],
     ];
 
     $content = [];
-    foreach ($this->entityTypeManager()->getStorage('invoice_type')->loadMultiple() as $type) {
-      $access = $this->entityTypeManager()->getAccessControlHandler('commerce_invoice')->createAccess($type->id(), NULL, [], TRUE);
-      if ($access->isAllowed()) {
-        $content[$type->id()] = $type;
-      }
-      $this->renderer->addCacheableDependency($build, $access);
+    // Only use node types the user has access to.
+    foreach ($this->entityTypeManager()->getStorage('commerce_invoice_type')->loadMultiple() as $type) {
+      $content[$type->id()] = $type;
     }
 
+    // Bypass the node/add listing if only one content type is available.
     if (count($content) == 1) {
       $type = array_shift($content);
-      return $this->redirect('entity.commerce_invoice.add', ['invoice_type' => $type->id()]);
+      return $this->redirect('entity.commerce_invoice.add', ['commerce_invoice_type' => $type->id()]);
     }
 
     $build['#content'] = $content;
@@ -68,9 +66,9 @@ class InvoiceController extends ControllerBase {
     return $build;
   }
 
-  public function add(InvoiceTypeInterface $invoiceType) {
+  public function add(InvoiceType $commerce_invoice_type) {
     $invoice = $this->entityTypeManager()->getStorage('commerce_invoice')->create([
-      'type' => $invoiceType->id(),
+      'bundle' => $commerce_invoice_type->id(),
     ]);
 
     $form = $this->entityFormBuilder()->getForm($invoice);
@@ -78,7 +76,7 @@ class InvoiceController extends ControllerBase {
     return $form;
   }
 
-  public function addPageTitle(InvoiceTypeInterface $invoiceType) {
-    return $this->t('Create @name', ['@name' => $invoiceType->label()]);
+  public function addPageTitle(InvoiceType $commerce_invoice_type) {
+    return $this->t('Create @name', ['@name' => $commerce_invoice_type->label()]);
   }
 }

@@ -24,7 +24,7 @@ class InvoiceListBuilder extends EntityListBuilder {
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
     return new static(
       $entity_type,
-      $container->get('entity.manager')->getStorage($entity_type->id()),
+      $container->get('entity_type.manager')->getStorage($entity_type->id()),
       $container->get('url_generator')
     );
   }
@@ -70,11 +70,16 @@ class InvoiceListBuilder extends EntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     /* @var \Drupal\commerce_smart_invoice\Entity\Invoice $entity */
     $pdf_id = $entity->getPdfId();
-    $pdf = File::load($pdf_id);
-    if(isset($pdf)) {
-      $pdf_url = '<a href="' . $pdf->url() . '" title="Voir la facture">' . $this->t('Voir la Facture') . '</a>';
+    if ($pdf_id) {
+      $pdf = File::load($pdf_id);
+      if (isset($pdf)) {
+        $pdf_url = $this->t('<a href="' . $pdf->url() . '" title="view PDF invoice">' . $this->t('view PDF invoice') . '</a>');
+      }
+      else {
+        $pdf_url = $this->t('The PDF is not generated yet !');
+      }
     } else {
-      $pdf_url = $this->t('Pas de facture au format PDF');
+      $pdf_url = $this->t('The PDF is not generated yet !');
     }
 
     $row['id'] = $entity->id();
@@ -90,9 +95,14 @@ class InvoiceListBuilder extends EntityListBuilder {
    */
   protected function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
+    $operations['view'] = [
+      'title' => $this->t('View invoice'),
+      'weight' => -1,
+      'url' => $entity->toUrl('canonical')
+    ];
     if ($entity->access('generate')) {
       $operations['generate'] = [
-        'title' => $this->t('Generate PDF'),
+        'title' => $this->t('Générer le PDF'),
         'weight' => 25,
         'url' => $entity->toUrl('generate-form'),
       ];

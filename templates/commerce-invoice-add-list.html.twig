@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Default theme implementation to list invoices types available for adding content.
+ * Default theme implementation to list node types available for adding content.
  *
  * This list is displayed on the Add content admin page.
  *
@@ -10,23 +10,23 @@
  *   - add_link: Link to create a piece of content of this type.
  *   - description: Description of this type of content.
  *
- * @see template_preprocess_invoice_add_list()
+ * @see template_preprocess_commerce_invoice_add_list()
  *
  * @ingroup themeable
  */
 #}
 {% if types is not empty %}
-  <dl>
-    {% for type in types %}
-      <dt>{{ type.add_link }}</dt>
-      <dd>{{ type.description }}</dd>
-    {% endfor %}
-  </dl>
+    <dl>
+        {% for type in types %}
+            <dt>{{ type.add_link }}</dt>
+            <dd>{{ type.description }}</dd>
+        {% endfor %}
+    </dl>
 {% else %}
-  <p>
-    {% set create_content = path('entity.invoice_type.add') %}
-    {% trans %}
-      You have not created any invoice types yet. Go to the <a href="{{ create_content }}">invoice type creation page</a> to add a new invoice type.
-    {% endtrans %}
-  </p>
+    <p>
+        {% set create_content = path('entity.commerce_invoice_type.add') %}
+        {% trans %}
+            You have not created any invoice types yet. Go to the <a href="{{ create_content }}">content type creation page</a> to add a new invoice type.
+        {% endtrans %}
+    </p>
 {% endif %}

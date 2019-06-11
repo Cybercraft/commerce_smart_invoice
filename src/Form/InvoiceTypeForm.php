@@ -3,7 +3,6 @@
 namespace Drupal\commerce_smart_invoice\Form;
 
 use Drupal\Core\Entity\BundleEntityFormBase;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field_ui\FieldUI;
 
@@ -14,55 +13,42 @@ class InvoiceTypeForm extends BundleEntityFormBase {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
-    /** @var \Drupal\commerce_smart_invoice\Entity\InvoiceTypeInterface $type */
-    $type = $this->entity;
 
-    if ($this->operation == 'add') {
-      $form['#title'] = $this->t('Add invoice type');
-    }
-    else {
-      $form['#title'] = $this->t('Edit %label invoice type', ['%label' => $type->label()]);
-    }
+    $entity_type = $this->entity;
+    $content_entity_id = $entity_type->getEntityType()->getBundleOf();
 
     $form['label'] = [
-      '#title' => t('Label'),
       '#type' => 'textfield',
-      '#default_value' => $type->label(),
-      '#description' => t('The human-readable name of this invoice type.'),
+      '#title' => $this->t('Label'),
+      '#maxlength' => 255,
+      '#default_value' => $entity_type->label(),
+      '#description' => $this->t("Label for the %content_entity_id entity type (bundle).", ['%content_entity_id' => $content_entity_id]),
       '#required' => TRUE,
-      '#size' => 30,
     ];
+
     $form['id'] = [
       '#type' => 'machine_name',
-      '#default_value' => $type->id(),
-      '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
+      '#default_value' => $entity_type->id(),
       '#machine_name' => [
-        'exists' => '\Drupal\commerce_smart_invoice\Entity\InvoiceType::load',
-        'source' => ['label'],
+        'exists' => '\Drupal\commerce_smart_invoice\Entity\Invoice::load',
       ],
-    ];
-    $form['description'] = [
-      '#title' => $this->t('Description'),
-      '#type' => 'textarea',
-      '#default_value' => $type->getDescription(),
-      '#description' => $this->t('This text will be displayed only for administrative purposes.'),
+      '#disabled' => !$entity_type->isNew(),
     ];
 
     return $this->protectBundleIdElement($form);
   }
-
   /**
    * {@inheritdoc}
    */
   protected function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
-    if (\Drupal::moduleHandler()->moduleExists('field_ui') &&
-      $this->getEntity()->isNew()
-    ) {
+
+    if (\Drupal::moduleHandler()->moduleExists('field_ui') && $this->getEntity()->isNew()) {
       $actions['save_continue'] = $actions['submit'];
       $actions['save_continue']['#value'] = $this->t('Save and manage fields');
       $actions['save_continue']['#submit'][] = [$this, 'redirectToFieldUi'];
     }
+
     return $actions;
   }
 
@@ -70,36 +56,36 @@ class InvoiceTypeForm extends BundleEntityFormBase {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $type = $this->entity;
-    $status = $type->save();
+    $entity_type = $this->entity;
+    $status = $entity_type->save();
+    $message_params = [
+      '%label' => $entity_type->label(),
+      '%content_entity_id' => $entity_type->getEntityType()->getBundleOf(),
+    ];
 
-    if ($status == SAVED_UPDATED) {
-      $this->messenger()->addMessage($this->t('%label invoice type has been updated.', ['%label' => $type->label()]));
+    switch ($status) {
+      case SAVED_NEW:
+        drupal_set_message($this->t('Created the %label %content_entity_id entity type.', $message_params));
+        break;
+
+      default:
+        drupal_set_message($this->t('Saved the %label %content_entity_id entity type.', $message_params));
     }
-    else {
-      $this->messenger()->addMessage($this->t('%label invoice type has been created.', ['%label' => $type->label()]));
-    }
-    $form_state->setRedirect('entity.invoice_type.collection');
+
+    $form_state->setRedirectUrl($entity_type->toUrl('collection'));
   }
 
   /**
    * Form submission handler to redirect to Manage fields page of Field UI.
    *
    * @param array $form
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * @param FormStateInterface $form_state
    */
   public function redirectToFieldUi(array $form, FormStateInterface $form_state) {
-    if ($form_state->getTriggeringElement()['#parents'][0] === 'save_continue' && $route_info = FieldUI::getOverviewRouteInfo('commerce_invoice', $this->entity->id())) {
+    $route_info = FieldUI::getOverviewRouteInfo($this->entity->getEntityType()->getBundleOf(), $this->entity->id());
+
+    if ($form_state->getTriggeringElement()['#parents'][0] === 'save_continue' && $route_info) {
       $form_state->setRedirectUrl($route_info);
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function delete(array $form, FormStateInterface $form_state) {
-    $form_state->setRedirect('entity.invoice_type.delete_form', [
-      'invoice_type' => $this->entity->id(),
-    ]);
   }
 }

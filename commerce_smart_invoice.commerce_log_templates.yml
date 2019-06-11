@@ -1,0 +1,4 @@
+invoice_tpl_pdf_generated:
+  category: commerce_order
+  label: 'Invoice PDF generated'
+  template: '<p>The invoice {{ invoice_id }} has been generated for order with id {{ order_id }}</p>'

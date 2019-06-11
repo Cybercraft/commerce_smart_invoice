@@ -1,0 +1,13 @@
+commerce_invoice.commerce_invoice_type.*:
+  type: config_entity
+  label: 'Invoice type settings'
+  mapping:
+    id:
+      type: string
+      label: 'Machine-readeable name'
+    uuid:
+      type: stype
+      label: 'UUID'
+    label:
+      type: label
+      label: 'label'
