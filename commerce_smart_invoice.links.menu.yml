@@ -8,7 +8,7 @@ entity.commerce_invoice_type.collection:
   title: 'Invoices types'
   description: 'Manage invoices types, including fields.'
   route_name: entity.commerce_invoice_type.collection
-  parent: commerce.configuration
+  parent: entity.commerce_invoice.admin.structure.settings
   weight: 10
 entity.commerce_invoice.admin.structure.settings:
   title: 'Invoices Settings'
